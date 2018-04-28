@@ -10,6 +10,29 @@
 CHAPTER=1
 DONE=0
 
-while [ "$DONE" == "0" ]; do
+if [ "$#" -lt 1 ]; then
+	echo Error: Must pass url of the manga as first argument
+	echo Usage: ./$0 URL [FIRST_CHAPTER]
+	exit 1
+fi
+URL=$1
 
+if [ "$#" -eq 2 ]; then
+	CHAPTER=$2
+fi
+
+echo Downloading manga
+while [ "$DONE" == "0" ]; do
+	echo Starting chapter $CHAPTER download
+	./download_chapter.sh $URL/$CHAPTER
+	if [ "$?" == "5" ]; then
+		echo Chapter $CHAPTER not found.
+		DONE=1
+	else
+		echo Chapter $CHAPTER downloaded successifully.
+		CHAPTER=$((CHAPTER+1))
+	fi
 done
+
+echo Manga download finished
+exit 0
