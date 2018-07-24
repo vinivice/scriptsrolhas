@@ -1,0 +1,103 @@
+#!/bin/bash
+cut -d$'\t' -f2,4 $1 > $2
+sed -i '2,$s/\t/\t=/g' $2
+sed -i 's/\(.*\)\./\1,/g' $2
+sed -i "s/K\s*$/\*1024/g" $2
+sed -i "s/M\s*$/\*1024\*1024/g" $2
+sed -i "s/G\s*$/\*1024\*1024\*1024/g" $2
+sed -i "s/T\s*$/\*1024\*1024\*1024\*1024/g" $2
+
+I=2
+
+AMAZON='=0'
+EMAIL='=0'
+FACEBOOK='=0'
+GLOBOVID='=0'
+GOOGLEMAPS='=0'
+GOOGLEVID='=0'
+HOSPEDAGEM='=0'
+INST='=0'
+NUVEMMS='=0'
+NETFLIX='=0'
+GERAL='=0'
+GOV='=0'
+OUTROS='=0'
+
+{
+read
+while read -r line
+do
+	URL=$(echo $line | cut -d ' ' -f1)
+	#if echo "$URL" | grep -q "goog"; then 
+	#	echo $URL
+	#	echo $'#'
+	#else
+	#	echo "FAIL"
+	#fi
+	
+	case "$URL" in
+		*"amazon"*|*"cloudfront"*)
+			echo AMAZON $I $URL;
+			AMAZON=$(echo $AMAZON+B$I);;
+		*"mail"*|*"outlook"*)
+			echo EMAIL $I $URL;
+			EMAIL=$(echo $EMAIL+B$I);;
+		*"facebook"*)
+			echo FACEBOOK $I $URL;
+			FACEBOOK=$(echo $FACEBOOK+B$I);;
+		*"glbimg"*|*"video.globo.com"*) 
+			echo GLOBOVID $I $URL;
+			GLOBOVID=$(echo $GLOBOVID+B$I);;
+		*"maps"*) #MELHORAR ESSA ENTRADA
+			echo MAPS $I $URL;
+			GOOGLEMAPS=$(echo $GOOGLEMAPS+B$I);;
+		*"youtube"*|*"googlevideo"*|*"yimg"*|*"ytimg"*)
+			echo GOOGLEVID $I $URL;
+			GOOGLEVID=$(echo $GOOGLEVID+B$I);;
+		*"drive.google.com"*|*"dropbox.com"*|*"akamai"*|*"4shared"*|*"mediafire"*|*"azure"*)
+			echo HOSPEDAGEM $I $URL;
+			HOSPEDAGEM=$(echo $HOSPEDAGEM+B$I);;
+		*"eb.mil.br"*|*[0-9].*[0-9].*[0-9].*[0-9])
+			echo INST $I $URL;
+			INST=$(echo $INST+B$I);;
+		*"delivery.mp.microsoft.com"*|*"windowsupdate"*|*"office"*)
+			echo NUVEMMS $I $URL;
+			NUVEMMS=$(echo $NUVEMMS+B$I);;
+		*"netflix"*)
+			echo NETFLIX $I $URL;
+			NETFLIX=$(echo $NETFLIX+B$I);;
+		*"whatsapp"*|*"uol"*|*"olx"*|*"globo.com"*|*"espn"*|*"google.com"*)
+			echo GERAL $I $URL;
+			GERAL=$(echo $GERAL+B$I);;
+		*"gov.br"*)
+			echo GOV $I $URL;
+			GOV=$(echo $GOV+B$I);;
+		*)
+			echo OUTROS $I $URL;
+			OUTROS=$(echo $OUTROS+B$I);;
+	esac
+	I=$((I + 1));
+
+
+
+done
+} < $2
+
+echo $'\n'TOTAL$'\t'"=SOMA(B2:B101)" >> $2;
+
+echo >> $2;
+echo Amazon$'\t''=(C105/$B$103)'$'\t'$AMAZON >> $2;
+echo E-mail$'\t''=(C106/$B$103)'$'\t'$EMAIL >> $2;
+echo Facebook$'\t''=(C107/$B$103)'$'\t'$FACEBOOK >> $2;
+echo Globo vídeo$'\t''=(C108/$B$103)'$'\t'$GLOBOVID >> $2;
+echo Google maps$'\t''=(C109/$B$103)'$'\t'$GOOGLEMAPS >> $2;
+echo Google vídeo$'\t''=(C110/$B$103)'$'\t'$GOOGLEVID >> $2;
+echo Hospedagem$'\t''=(C111/$B$103)'$'\t'$HOSPEDAGEM >> $2;
+echo Sites institucionais$'\t''=(C112/$B$103)'$'\t'$INST >> $2;
+echo Nuvem Microsoft$'\t''=(C113/$B$103)'$'\t'$NUVEMMS >> $2;
+echo Netflix$'\t''=(C114/$B$103)'$'\t'$NETFLIX >> $2;
+echo Sites em geral$'\t''=(C115/$B$103)'$'\t'$GERAL >> $2;
+echo Sites governamentais$'\t''=(C116/$B$103)'$'\t'$GOV >> $2;
+echo Outros sites$'\t''=(C117/$B$103)'$'\t'$OUTROS >> $2;
+echo $'\n'TOTAL$'\t''=(C119/$B$103)'$'\t'"=SOMA(C105:C117)" >> $2;
+
